@@ -141,6 +141,11 @@ mv /output/path/tokenizer/* /output/path/llama-7b
 ```
 
 ```bash
+git submodule sync
+git submodule update --init --recursive
+cd stanford_alpaca
+pip install -r requirements.txt
+
 torchrun --nproc_per_node=8 --master_port=8881 train.py \
     --model_name_or_path /output/path/llama-7b/ \
     --data_path ./alpaca_data.json \
