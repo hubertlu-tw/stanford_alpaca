@@ -6,7 +6,7 @@ import io
 import sys
 import time
 import json
-from typing import Optional, Sequence, Union
+from typing import Optional, Sequence, Union, Dict
 
 import openai
 import tqdm
@@ -37,7 +37,7 @@ class OpenAIDecodingArguments(object):
 
 
 def openai_completion(
-    prompts: Union[str, Sequence[str], Sequence[dict[str, str]], dict[str, str]],
+    prompts: Union[str, Sequence[str], Sequence[Dict[str, str]], Dict[str, str]],
     decoding_args: OpenAIDecodingArguments,
     model_name="text-davinci-003",
     sleep_time=2,
@@ -70,7 +70,7 @@ def openai_completion(
             - an openai_object.OpenAIObject object (if return_text is False)
             - a list of objects of the above types (if decoding_args.n > 1)
     """
-    is_single_prompt = isinstance(prompts, (str, dict))
+    is_single_prompt = isinstance(prompts, (str, Dict))
     if is_single_prompt:
         prompts = [prompts]
 
@@ -98,7 +98,7 @@ def openai_completion(
 
         while True:
             try:
-                shared_kwargs = dict(
+                shared_kwargs = Dict(
                     model=model_name,
                     **batch_decoding_args.__dict__,
                     **decoding_kwargs,
