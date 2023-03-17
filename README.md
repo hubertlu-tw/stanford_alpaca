@@ -120,7 +120,7 @@ path to your converted checkpoint and tokenizer (following instructions in the P
 torchrun --nproc_per_node=4 --master_port=<your_random_port> train.py \
     --model_name_or_path <your_path_to_hf_converted_llama_ckpt_and_tokenizer> \
     --data_path ./alpaca_data.json \
-    --bf16 True \
+    --bf16 False \
     --output_dir <your_output_dir> \
     --num_train_epochs 3 \
     --per_device_train_batch_size 4 \
@@ -136,8 +136,8 @@ torchrun --nproc_per_node=4 --master_port=<your_random_port> train.py \
     --lr_scheduler_type "cosine" \
     --logging_steps 1 \
     --fsdp "full_shard auto_wrap" \
-    --fsdp_transformer_layer_cls_to_wrap 'LLaMADecoderLayer' \
-    --tf32 True
+    --fsdp_transformer_layer_cls_to_wrap 'LlamaDecoderLayer' \
+    --tf32 False
 ```
 
 ### Warning
