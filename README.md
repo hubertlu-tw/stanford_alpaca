@@ -117,14 +117,38 @@ Replace `<your_random_port>` with a port of your own, `<your_path_to_hf_converte
 path to your converted checkpoint and tokenizer (following instructions in the PR), and `<your_output_dir>` with where you want to store your outputs.
 
 ```bash
-torchrun --nproc_per_node=4 --master_port=<your_random_port> train.py \
-    --model_name_or_path <your_path_to_hf_converted_llama_ckpt_and_tokenizer> \
+sudo docker run -it -d --network=host --device=/dev/kfd --device=/dev/dri --name=transformers_alpaca --shm-size 16G --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --group-add video rocm/pytorch:latest
+
+docker exec -it transformers_alpaca /bin/bash
+
+cd /
+git clone https://github.com/hubertlu-tw/transformers.git -b stanford_alpaca
+pip install sentencepiece
+cd /transformers
+git show --oneline -s
+pip install -e .
+
+mkdir -p llama_7B
+cd llama_7B && aws --region=us-east-2 s3 cp s3://datasets.dl/facebookresearch_llama/7B/ `pwd` --recursive
+
+python src/transformers/models/llama/convert_llama_weights_to_hf.py \
+    --input_dir /transformers/llama_7B \
+    --model_size 7B \
+    --output_dir /output/path
+
+mv /output/path/tokenizer/* /output/path/llama-7b
+
+```
+
+```bash
+torchrun --nproc_per_node=8 --master_port=8881 train.py \
+    --model_name_or_path /output/path/llama-7b/ \
     --data_path ./alpaca_data.json \
     --bf16 False \
-    --output_dir <your_output_dir> \
+    --output_dir /output/path/alpaca/ \
     --num_train_epochs 3 \
-    --per_device_train_batch_size 4 \
-    --per_device_eval_batch_size 4 \
+    --per_device_train_batch_size 2 \
+    --per_device_eval_batch_size 2 \
     --gradient_accumulation_steps 8 \
     --evaluation_strategy "no" \
     --save_strategy "steps" \
